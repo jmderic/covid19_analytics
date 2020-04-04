@@ -1,0 +1,8 @@
+# backup files
+*~
+
+# developer convenience
+*.diff
+# if you want to check a diff file in, call it *.patch
+*_devX*
+*.log
