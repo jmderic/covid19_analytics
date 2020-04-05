@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 
-# Note: this is the newer app preamble
-import os.path, sys
-
-# following not python3 friendly: AttributeError: 'function' object has no attribute 'func_code'
-#this_dir = os.path.dirname((lambda x:x).func_code.co_filename)
+# Note: this is the newer app preamble updated for python3
+import os.path, sys, inspect
+this_file = os.path.abspath(inspect.getsourcefile((lambda x:x)))
+this_dir = os.path.dirname(this_file)
 # jmd_python_dir = this_dir + '/..'
-#sys.path.append(this_dir)
+sys.path.append(this_dir)
 # import test_startup
 from argparse import ArgumentParser
 # end: preamble
@@ -22,23 +21,19 @@ def compute_active(csv_file, death_delay, recover_delay):
     # pd.set_option('display.max_colwidth', 10) # does not seem to work
     type_spec = { 'Confirmed' : np.int32, 'Deaths' : np.int32 }
     df1 = pd.read_csv(csv_file, parse_dates=['Date'], dtype=type_spec)
-    #df2 = df.drop([df.index[0]])
-    #df1['Date'] = df1['Date'].astype(Timestamp)
     #df1['Deaths'] = df1['Deaths'].astype(int)
-    #df1['Confirmed'] = df1['Confirmed'].astype(int)
+
+    # add the DieLater and RecLater columns
     date_list = df1['Date'].tolist()
-    #print(date_list)
     df1['DieLater'] = 0
     df1['DieLater'] = df1['DieLater'].astype(int)
-    #print(df1)
     for i,v in df1.iterrows():
         if v["Deaths"]:
             #print(f"idx {i} val {v}")
-            #dt = df1.loc[df1.index==i].index.values[0] ... also iloc
             dt1 = v['Date']
             dt2 = dt1 - pd.Timedelta(days=death_delay)
-            #print(dt2)
             if dt2 in date_list:
+                # update value in existing row
                 df1.at[df1.loc[df1['Date']==dt2].index, 'DieLater'] = v["Deaths"]
             else:
                 # add row of zeros except positive value in 'DieLater'
@@ -46,22 +41,17 @@ def compute_active(csv_file, death_delay, recover_delay):
                                  'DieLater' : v["Deaths"] }
                 df1 = df1.append(add_row_dict, ignore_index=True)
 
-    #print(df1)
     df2 = df1.sort_values(by=['Date'])
     df2 = df2[['Date', 'Confirmed', 'Deaths', 'DieLater']]
     df2 = df2.reset_index(drop=True)
-    #df2['CumConf'] = df2['Confirmed'].cumsum()
     df2['RecLater'] = df2['Confirmed'] - df2['DieLater']
-    #df2['CumDieLater'] = df2['DieLater'].cumsum()
     #df2['CumConf'] = df2.groupby('Date')['Confirmed'].transform(pd.Series.cumsum)
     end_date = df2['Date'].iat[-1]
-    #print(df2)
 
+    # add the recovered column
     date_list = df2['Date'].tolist()
-    #print(date_list)
     df2['Recovered'] = 0
     df2['Recovered'] = df2['Recovered'].astype(int)
-    #print(df2)
     recovered_shortage = 0
     for i,v in df2.iterrows():
         recovered_net = recovered_shortage + v['RecLater']
@@ -70,12 +60,10 @@ def compute_active(csv_file, death_delay, recover_delay):
             continue
         else:
             recovered_shortage = 0
-            #print(f"idx {i} val {v}")
             dt1 = v['Date']
             dt2 = dt1 + pd.Timedelta(days=recover_delay)
             if dt2 > end_date:
                 break
-            #print(dt2)
             if dt2 in date_list:
                 df2.at[df2.loc[df2['Date']==dt2].index, 'Recovered'] = recovered_net
             else:
@@ -87,10 +75,10 @@ def compute_active(csv_file, death_delay, recover_delay):
 
     df3 = df2.sort_values(by=['Date'])
     df3 = df3.set_index('Date')
-    #df3 = df3[['Date', 'Confirmed', 'Deaths', 'DieLater', 'RecLater', 'Recovered']]
     df3 = df3[['Confirmed', 'Deaths', 'DieLater', 'RecLater', 'Recovered']]
     #df3 = df3.reset_index(drop=True)
     df3['Active'] = df3['Confirmed'] - df3['Deaths'] - df3['Recovered']
+    # add the cumulative columns
     df3['CumConf'] = df3['Confirmed'].cumsum()
     df3['CumDeaths'] = df3['Deaths'].cumsum()
     df3['CumRec'] = df3['Recovered'].cumsum()
@@ -99,7 +87,7 @@ def compute_active(csv_file, death_delay, recover_delay):
     return df3
 
 def plot_active(df1, Log10):
-    # dataframe fixup
+    # dataframe pruning
     unwanted_cols = ['Confirmed', 'Deaths', 'DieLater', 'RecLater',
                      'Recovered', 'Active']
     df1 = df1.drop(unwanted_cols, axis=1)
@@ -121,7 +109,6 @@ def plot_active(df1, Log10):
         #ax.yaxis.set_major_formatter(ScalarFormatter())
     plt.legend(loc='best', labels=['Confirmed', 'Deaths', 'Recovered', 'Active'])
     plt.savefig('plot.svg')
-    #plt.show()
 
 class FindActive:
     def __init__(self, cl_args):
@@ -141,16 +128,23 @@ def call_runner(cl_args) :
     return impl.run()
 
 if __name__ == '__main__':
+    print(this_dir)
     parser = ArgumentParser()
     subparsers = parser.add_subparsers()
 
     # parser for the start_idea subcommand
     p_start_idea = subparsers.add_parser('find_active')
     p_start_idea.set_defaults(run_class=FindActive)
-    p_start_idea.add_argument('-d', '--death-delay', help='Avg. days, symptomatic to death', type=int, default=17)
-    p_start_idea.add_argument('-r', '--recover-delay', help='Avg. days, symptomatic to recovery', type=int, default=14)
-    p_start_idea.add_argument('-i', '--csv-file', help='CSV input file', type=str, required=True)
-    p_start_idea.add_argument('-l', '--log-plot', help='Plot y axis as log', action='store_true')
+    p_start_idea.add_argument('-d', '--death-delay',
+                              help='Avg. days, symptomatic to death (default: 17)',
+                              type=int, default=17)
+    p_start_idea.add_argument('-r', '--recover-delay',
+                              help='Avg. days, symptomatic to recovery (default: 14)',
+                              type=int, default=14)
+    p_start_idea.add_argument('-i', '--csv-file',
+                              help='CSV input file', type=str, required=True)
+    p_start_idea.add_argument('-l', '--log-plot',
+                              help='Plot y axis as log', action='store_true')
 
     # generic subcommand execution call
     parsed_args = parser.parse_args()
