@@ -109,6 +109,7 @@ def plot_active(df1, Log10):
         #ax.yaxis.set_major_formatter(ScalarFormatter())
     plt.legend(loc='best', labels=['Confirmed', 'Deaths', 'Recovered', 'Active'])
     plt.savefig('plot.svg')
+    plt.savefig('plot.png')
 
 class FindActive:
     def __init__(self, cl_args):
