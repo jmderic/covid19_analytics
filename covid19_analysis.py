@@ -102,14 +102,17 @@ def plot_active(df1, Log10):
     # do the plotting
     #plt.figure()
     df1.plot()
+    plot_name_crumb='_linear'
     if Log10:
         plt.yscale('log')
+        plot_name_crumb='_loglin'
         #plt.ticklabel_format(axis='y', style='plain')
         #fig, ax = plt.subplots()
         #ax.yaxis.set_major_formatter(ScalarFormatter())
     plt.legend(loc='best', labels=['Confirmed', 'Deaths', 'Recovered', 'Active'])
-    plt.savefig('plot.svg')
-    plt.savefig('plot.png')
+    plt.grid(which='both', axis='both')
+    plt.savefig(f'plot{plot_name_crumb}.svg')
+    plt.savefig(f'plot{plot_name_crumb}.png')
 
 class FindActive:
     def __init__(self, cl_args):
