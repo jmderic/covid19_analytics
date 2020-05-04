@@ -101,6 +101,7 @@ def plot_active(df1, Log10):
     print(df1)
     # do the plotting
     #plt.figure()
+    plt.rcParams.update({'figure.autolayout' : True})
     df1.plot()
     plot_name_crumb='_linear'
     if Log10:
@@ -111,6 +112,7 @@ def plot_active(df1, Log10):
         #ax.yaxis.set_major_formatter(ScalarFormatter())
     plt.legend(loc='best', labels=['Confirmed', 'Deaths', 'Recovered', 'Active'])
     plt.grid(which='both', axis='both')
+    #plt.show()
     plt.savefig(f'plot{plot_name_crumb}.svg')
     plt.savefig(f'plot{plot_name_crumb}.png')
 
