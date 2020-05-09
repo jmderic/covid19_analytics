@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 
 def compute_active(csv_file, death_delay, recover_delay):
     pd.set_option('display.width', 120)
+    pd.set_option("display.max_rows", 999)
     # pd.set_option('display.max_colwidth', 10) # does not seem to work
     type_spec = { 'Confirmed' : np.int32, 'Deaths' : np.int32 }
     df1 = pd.read_csv(csv_file, parse_dates=['Date'], dtype=type_spec)
