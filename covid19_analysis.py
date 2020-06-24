@@ -92,10 +92,10 @@ def plot_active(df1, Log10):
     unwanted_cols = ['Confirmed', 'Deaths', 'DieLater', 'RecLater',
                      'Recovered', 'Active']
     df1 = df1.drop(unwanted_cols, axis=1)
-    if Log10:
+    if True : # was Log10
         unwanted = df1[(df1['CumConf']==0) | (df1['CumDeaths']==0)
                        | (df1['CumRec']==0) | (df1['CumActive']==0)]
-    else:
+    else: 
         unwanted = df1[(df1['CumConf']<=10) & (df1['CumDeaths']<=10)
                        & (df1['CumRec']<=10) & (df1['CumActive']<=10)]
     df1 = df1.drop(unwanted.index)
