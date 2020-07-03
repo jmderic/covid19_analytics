@@ -1,15 +1,5 @@
 #!/usr/bin/python3
 
-# Note: this is the newer app preamble updated for python3
-import os.path, sys, inspect
-this_file = os.path.abspath(inspect.getsourcefile((lambda x:x)))
-this_dir = os.path.dirname(this_file)
-# jmd_python_dir = this_dir + '/..'
-sys.path.append(this_dir)
-# import test_startup
-from argparse import ArgumentParser
-# end: preamble
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -116,44 +106,3 @@ def plot_active(df1, Log10):
     #plt.show()
     plt.savefig(f'plot{plot_name_crumb}.svg')
     plt.savefig(f'plot{plot_name_crumb}.png')
-
-class FindActive:
-    def __init__(self, cl_args):
-        self.cl_args = cl_args
-        self.csv_file = cl_args.csv_file
-        self.death_delay = cl_args.death_delay
-        self.recover_delay = cl_args.recover_delay
-        self.log_plot = cl_args.log_plot
-
-    def run(self):
-        df = compute_active(self.csv_file, self.death_delay, self.recover_delay)
-        plot_active(df, self.log_plot)
-
-def call_runner(cl_args) :
-    os.umask(0o002)
-    impl = cl_args.run_class(cl_args)
-    return impl.run()
-
-if __name__ == '__main__':
-    print(this_dir)
-    parser = ArgumentParser()
-    subparsers = parser.add_subparsers()
-
-    # parser for the start_idea subcommand
-    p_start_idea = subparsers.add_parser('find_active')
-    p_start_idea.set_defaults(run_class=FindActive)
-    p_start_idea.add_argument('-d', '--death-delay',
-                              help='Avg. days, symptomatic to death (default: 17)',
-                              type=int, default=17)
-    p_start_idea.add_argument('-r', '--recover-delay',
-                              help='Avg. days, symptomatic to recovery (default: 14)',
-                              type=int, default=14)
-    p_start_idea.add_argument('-i', '--csv-file',
-                              help='CSV input file', type=str, required=True)
-    p_start_idea.add_argument('-l', '--log-plot',
-                              help='Plot y axis as log', action='store_true')
-
-    # generic subcommand execution call
-    parsed_args = parser.parse_args()
-    #print parsed_args
-    exit(call_runner(parsed_args))
