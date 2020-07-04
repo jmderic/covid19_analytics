@@ -16,10 +16,10 @@ class Reformatter:
         #print(f'Working directory: {self.wrk_dir}')
 
     def create_input_data(self):
-        files = { 'cases' : 'results_confirmed.csv',
-                  'deaths' : 'results_deaths.csv' }
+        files = { 'Cases' : 'results_confirmed.csv',
+                  'Deaths' : 'results_deaths.csv' }
         df_dict = {}
-        for datum in ('cases', 'deaths'):
+        for datum in files:
             df_raw = pd.read_csv(self.wrk_dir / files[datum])
             #print(df_raw)
             df = df_raw.transpose()
@@ -38,5 +38,7 @@ class Reformatter:
             df_dict[datum] = df
             #print(df.info())
             #print(df)
-        df_both = df_dict['cases'].join(df_dict['deaths'], how='inner')
+        df_both = df_dict['Cases'].join(df_dict['Deaths'], how='inner')
+        
+        df_both.to_csv(self.wrk_dir / 'covid_oc.csv')
         print(df_both)
