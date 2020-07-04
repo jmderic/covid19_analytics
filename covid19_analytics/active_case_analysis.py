@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+# Copyright J. Mark Deric, 2020.  All rights reserved
 
 import pandas as pd
 import numpy as np

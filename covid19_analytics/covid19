@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# Copyright J. Mark Deric, 2020.  All rights reserved
 
 # Note: this is the newer app preamble updated for python3
 import os.path, sys, inspect
@@ -8,7 +9,10 @@ parent_dir = this_dir + '/..'
 sys.path.append(parent_dir)
 # end: preamble
 
-from covid19_analytics.subcommand_runners import FindActive
+from covid19_analytics.subcommand_runners import (
+    FindActive,
+    Jhu2Csv
+    )
 
 from argparse import ArgumentParser
 
@@ -18,11 +22,11 @@ def call_runner(cl_args) :
     return impl.run()
 
 if __name__ == '__main__':
-    print(this_dir)
+    #print(this_dir)
     parser = ArgumentParser()
     subparsers = parser.add_subparsers()
 
-    # parser for the start_idea subcommand
+    # parser for the find_active subcommand
     p_start_idea = subparsers.add_parser('find_active')
     p_start_idea.set_defaults(run_class=FindActive)
     p_start_idea.add_argument('-d', '--death-delay',
@@ -35,6 +39,12 @@ if __name__ == '__main__':
                               help='CSV input file', type=str, required=True)
     p_start_idea.add_argument('-l', '--log-plot',
                               help='Plot y axis as log', action='store_true')
+
+    # parser for the jhu2csv subcommand
+    p_start_idea = subparsers.add_parser('jhu2csv')
+    p_start_idea.set_defaults(run_class=Jhu2Csv)
+    p_start_idea.add_argument('-w', '--working-data',
+                              help='Working data directory', type=str, required=True)
 
     # generic subcommand execution call
     parsed_args = parser.parse_args()
