@@ -1,4 +1,7 @@
-on Jun 6, today, the OC health authority significantly changed the way
+Data source changes, Jun 6
+==========================
+
+On Jun 6, today, the OC health authority significantly changed the way
 they present the data.  The variables full of raw data were gone from
 their website.
 
@@ -14,3 +17,50 @@ Adding today's totals to the previous data matches on deaths, but is
 11960.
 
 True ups to be performed later as we learn how to access the raw data.
+
+Convert to python 3.8.3 running under pipenv
+============================================
+
+Build python 3.8.3 on ubuntu 18.04
+
+cp ~/Downloads/Python-3.8.3.tgz .
+tar xzf Python-3.8.3.tgz 
+../configure --help
+../configure --prefix=/opt/python3.8 --enable-optimizations
+touch start_install_`date '+%Y%m%d_%H%M%S'`; sudo make altinstall; touch finish_install_`date '+%Y%m%d_%H%M%S'`
+/opt/python3.8/bin/python3.8 -V
+
+Misses many build dependencies; to resolve:
+first did this to add lzma
+apt install liblzma-dev
+but then realized this was no a full list; saw post to do this:
+apt-get build-dep python3.6
+but the above requires uncommenting
+deb-src http://us.archive.ubuntu.com/ubuntu/ bionic main restricted
+in /etc/apt/sources.list
+in addition, to get fm 3.6 to 3.8.3
+apt-get install uuid-dev
+
+Install pipenv and upgrade pip based upon python3.8
+
+Update PATH in .bashrc:
+export PATH=/opt/python3.8/bin:$PATH
+touch start_install_`date '+%Y%m%d_%H%M%S'`; pip3.8 install pipenv --user; touch finish_install_`date '+%Y%m%d_%H%M%S'`
+pip3.8 install --upgrade pip --user
+
+Put the covid19_analytics package under pipenv
+
+In covid19_analytics $TOP:
+pipenv install pandas
+pipenv install matplotlib
+git add Pipfile	Pipfile.lock
+git checkout -b pipfile_work
+git commit
+convert shebang in covid19_analytics/covid19 to
+#!/usr/bin/env python3.8
+
+then to run:
+pipenv shell
+emacs needs eval
+(setq comint-process-echoes t)
+exit
