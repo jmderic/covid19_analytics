@@ -1,19 +1,17 @@
 # Copyright J. Mark Deric, 2020.  All rights reserved
 
-from pathlib import Path
-
 import pandas as pd
+
+import common
 
 def date_reorg(str):
     mdy = str.split('/')
     return f'20{int(mdy[2]):02}-{int(mdy[0]):02}-{int(mdy[1]):02}'
 
 class Reformatter:
-    def __init__(self, cl_args):
-        cwd = Path.cwd()
-        data_dir = cwd / cl_args.working_data
-        self.wrk_dir = data_dir.resolve()
-        #print(f'Working directory: {self.wrk_dir}')
+    def __init__(self, csv_filename, cl_args):
+        tup = common.get_wrkcsv_paths(csv_filename, cl_args.wrk_dir)
+        self.wrk_dir, self.csv_file = tup
 
     def create_input_data(self):
         files = { 'Cases' : 'results_confirmed.csv',
@@ -21,18 +19,16 @@ class Reformatter:
         df_dict = {}
         for datum in files:
             df_raw = pd.read_csv(self.wrk_dir / files[datum])
-            #print(df_raw)
             df = df_raw.transpose()
             df = df.reset_index()
-            df = df.rename(columns={"index" : "Date", 0 : datum})
-            first_day = df.Date.eq("1/22/20").idxmax()
+            col_name = f'Cum{datum}'
+            df = df.rename(columns={"index" : "Date", 0 : col_name})
+            first_day = df.Date.eq("1/22/20").idxmax() # FIXME: maybe regexp?
             df = df.drop(list(range(0,first_day)))
-            df[datum] = df[datum].diff()
-            diff_nan = df.Date.isna().idxmax()
-            df = df.drop([diff_nan])
+
             df['Date'] = [date_reorg(x) for x in df['Date']]
             df['Date'] = df['Date'].astype('datetime64[D]')
-            df[datum] = df[datum].astype('int32')
+            df[col_name] = df[col_name].astype('int32')
             df = df.sort_values(by=['Date'])
             df = df.set_index('Date')
             df_dict[datum] = df
@@ -40,5 +36,6 @@ class Reformatter:
             #print(df)
         df_both = df_dict['Cases'].join(df_dict['Deaths'], how='inner')
         
-        df_both.to_csv(self.wrk_dir / 'covid_oc.csv')
+        df_both.to_csv(self.csv_file)
         print(df_both)
+        print(df_both.info())

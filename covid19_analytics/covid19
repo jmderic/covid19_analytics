@@ -11,7 +11,7 @@ sys.path.append(parent_dir)
 
 from covid19_analytics.subcommand_runners import (
     FindActive,
-    Jhu2Csv
+    Jhu2Csv,
     )
 
 from argparse import ArgumentParser
@@ -29,21 +29,16 @@ if __name__ == '__main__':
     # parser for the find_active subcommand
     p_start_idea = subparsers.add_parser('find_active')
     p_start_idea.set_defaults(run_class=FindActive)
-    p_start_idea.add_argument('-d', '--death-delay',
-                              help='Avg. days, symptomatic to death (default: 17)',
-                              type=int, default=17)
     p_start_idea.add_argument('-r', '--recover-delay',
                               help='Avg. days, symptomatic to recovery (default: 14)',
                               type=int, default=14)
-    p_start_idea.add_argument('-i', '--csv-file',
-                              help='CSV input file', type=str, required=True)
-    p_start_idea.add_argument('-l', '--log-plot',
-                              help='Plot y axis as log', action='store_true')
+    p_start_idea.add_argument('-w', '--wrk-dir',
+                              help='Working data directory', type=str, required=True)
 
     # parser for the jhu2csv subcommand
     p_start_idea = subparsers.add_parser('jhu2csv')
     p_start_idea.set_defaults(run_class=Jhu2Csv)
-    p_start_idea.add_argument('-w', '--working-data',
+    p_start_idea.add_argument('-w', '--wrk-dir',
                               help='Working data directory', type=str, required=True)
 
     # generic subcommand execution call
