@@ -1,0 +1,52 @@
+Series of web pages viewed:
+
+https://www.cdph.ca.gov/Programs/CID/DCDC/Pages/COVID-19/COVID19CountyMonitoringOverview.aspx
+
+https://www.cdph.ca.gov/Programs/CHSI/Pages/Researchers-and-Statisticians.aspx
+
+CALIFORNIA HEALTH AND HUMAN SERVICES OPEN DATA PORTAL
+Popular datasets
+https://data.chhs.ca.gov/
+
+6 datasets found
+https://data.ca.gov/group/covid-19
+
+COVID-19 Testing
+Testing data related to the California COVID-19 response.
+CSV
+COVID-19 PPE Logistics
+Logistics data for COVID-19 related personal protective equipment
+CSV
+COVID-19 Hospital Data
+Hospital data for the COVID-19 response
+CSV
+COVID-19 Homeless Impact
+COVID-19 homeless impact
+CSV
+COVID-19 Cases
+Case data for California COVID-19 response.
+CSV
+COVID-19 Medical Surge Facilities
+COVID-19 Medical Surge Facilities
+CVS
+
+Hospitals By County (incl. API link)
+https://data.ca.gov/dataset/covid-19-hospital-data/resource/42d33765-20fd-44b8-a978-b083b7542225
+
+API link leads here
+https://data.ca.gov/api/1/util/snippet/api_info.html?resource_id=42d33765-20fd-44b8-a978-b083b7542225
+
+9 datasets found
+https://data.ca.gov/dataset?tags=covid-19
+
+COVID-19 Cases
+https://data.ca.gov/dataset/covid-19-cases
+
+COVID-19 Cases (incl. API link)
+https://data.ca.gov/dataset/covid-19-cases/resource/926fd08f-cc91-4828-af38-bd45de97f8c3
+
+API link leads here
+https://data.ca.gov/api/1/util/snippet/api_info.html?resource_id=926fd08f-cc91-4828-af38-bd45de97f8c3
+
+API help
+file:///home/mark/development/covid19_study/covid19_analytics/api_help.html
