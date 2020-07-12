@@ -9,8 +9,8 @@ def date_reorg(str):
     return f'20{int(mdy[2]):02}-{int(mdy[0]):02}-{int(mdy[1]):02}'
 
 class Reformatter:
-    def __init__(self, csv_filename, cl_args):
-        tup = common.get_wrkcsv_paths(csv_filename, cl_args.wrk_dir)
+    def __init__(self, csv_filename, wrk_dir):
+        tup = common.get_wrkcsv_paths(csv_filename, wrk_dir)
         self.wrk_dir, self.csv_file = tup
 
     def create_input_data(self):

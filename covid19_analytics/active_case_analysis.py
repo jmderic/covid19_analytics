@@ -9,10 +9,10 @@ import common
 #from matplotlib.ticker import ScalarFormatter
 
 class ActiveCases:
-    def __init__(self, csv_filename, cl_args):
-        wrkcsv_paths = common.get_wrkcsv_paths(csv_filename, cl_args.wrk_dir)
-        self.wrk_dir, self.csv_file = wrkcsv_paths
-        self.recover_delay = cl_args.recover_delay
+    def __init__(self, csv_filename, wrk_dir, recover_delay):
+        tup = common.get_wrkcsv_paths(csv_filename, wrk_dir)
+        self.wrk_dir, self.csv_file = tup
+        self.recover_delay = recover_delay
 
         print(f'Max Rows {pd.get_option("display.max_rows")}')
         pd.set_option("display.min_rows", 40)
