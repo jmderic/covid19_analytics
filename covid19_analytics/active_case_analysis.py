@@ -3,10 +3,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
-import common
-
+import matplotlib.dates as mdates
 #from matplotlib.ticker import ScalarFormatter
+from covid19_analytics import common
 
 class ActiveCases:
     def __init__(self, csv_filename, wrk_dir, recover_delay):
@@ -21,11 +20,22 @@ class ActiveCases:
 
     def create_active_plots(self):
         df = self.get_active_df()
-        # 2nd arg: log-lin plot, True; lin-lin plot, False
+        df = prune_dates(df)
+        # 3rd arg: log-lin plot, True; lin-lin plot, False
         plot_active(df, self.wrk_dir, False)
         plot_active(df, self.wrk_dir, True)
 
-    def get_active_df(self):
+    def create_daily_plots(self):
+        df = self.get_active_df()
+        tau = 9
+        data = ('Deaths', 'Cases',)
+        for datum in data:
+            add_smoothed_col(df, datum, tau)
+        df = prune_dates(df)
+        for datum in data:
+            plot_datum(df, self.wrk_dir, datum)
+
+    def get_active_df(self, print_df=False):
         df = self.get_alldate_csv(self.csv_file)
         df['MaxRec'] = df['CumCases'].shift(self.recover_delay,
                                             fill_value=0).astype('int32')
@@ -34,8 +44,9 @@ class ActiveCases:
         data = ('Cases', 'Deaths', 'Rec', 'Active', )
         for datum in data:
             add_daily_col(df, datum)
-        print(df)
-        print(df.info())
+        if print_df:
+            print(df)
+            print(df.info())
         return df
 
     def get_alldate_csv(self, csv_file):
@@ -44,9 +55,20 @@ class ActiveCases:
                          dtype=type_spec)
         idx = pd.date_range(min(df.index), max(df.index))
         df = df.reindex(idx, fill_value=0)
-        #print(df)
-        #print(df.info())
         return df
+
+def prune_dates(df):
+    #pd.set_option("display.max_rows", 999)
+    if True : # was Log10
+        unwanted = df[(df['CumCases']==0) | (df['CumDeaths']==0)
+                       | (df['CumRec']==0) | (df['CumActive']==0)]
+    else: 
+        unwanted = df[(df['CumCases']<=10) & (df['CumDeaths']<=10)
+                       & (df['CumRec']<=10) & (df['CumActive']<=10)]
+    df1 = df.drop(unwanted.index)
+    print(df1)
+    print(df.info())
+    return df1
 
 def add_daily_col(df, datum):
     cum_name = f'Cum{datum}'
@@ -58,21 +80,34 @@ def add_daily_col(df, datum):
     # end: view vs copy
     df[datum] = df[datum].astype('int32')
 
+class Smoother:
+    def __init__(self, tau_periods):
+        self.alpha = 1 / (tau_periods + 1)
+        self.smoothed = None
+
+    def __call__(self, value):
+        if self.smoothed == None:
+            self.smoothed = value
+            return value
+        self.smoothed = self.alpha * value + (1 - self.alpha) * self.smoothed
+        return self.smoothed
+
+def add_smoothed_col(df, datum, tau_periods):
+    """tau is the time constant for the first order filter.  For the
+    analog systemn in response to a 100% step change in the input, the
+    output will go to 63.% in one time constant; 86.5 in 2 tau; 95.0%
+    in 3 tau; 99.8% in 6 tau.  The discrete time system appears to
+    yield slightly lower values.
+    """
+    sm_name = f'Sm{datum}'
+    sm = Smoother(tau_periods)
+    df[sm_name] = df[datum].apply(sm)
+
 def plot_active(df, output_dir, Log10):
-    # dataframe pruning
     #unwanted_cols = ['MaxRec', 'Cases', 'Deaths', 'Rec', 'Active',]
     #df1 = df.drop(unwanted_cols, axis=1)
     df1 = df[['CumCases', 'CumDeaths', 'CumRec', 'CumActive',]]
-    if True : # was Log10
-        unwanted = df1[(df1['CumCases']==0) | (df1['CumDeaths']==0)
-                       | (df1['CumRec']==0) | (df1['CumActive']==0)]
-    else: 
-        unwanted = df1[(df1['CumCases']<=10) & (df1['CumDeaths']<=10)
-                       & (df1['CumRec']<=10) & (df1['CumActive']<=10)]
-    df1 = df1.drop(unwanted.index)
-    print(df1)
     # do the plotting
-    #plt.figure()
     plt.rcParams.update({'figure.autolayout' : True})
     df1.plot()
     plot_name_crumb='_linear'
@@ -80,10 +115,29 @@ def plot_active(df, output_dir, Log10):
         plt.yscale('log')
         plot_name_crumb='_loglin'
         #plt.ticklabel_format(axis='y', style='plain')
-        #fig, ax = plt.subplots()
-        #ax.yaxis.set_major_formatter(ScalarFormatter())
     plt.legend(loc='best', labels=['Cases', 'Deaths', 'Recovered', 'Active'])
     plt.grid(which='both', axis='both')
     #plt.show()
     plt.savefig(output_dir / f'plot{plot_name_crumb}.svg')
     plt.savefig(output_dir / f'plot{plot_name_crumb}.png')
+
+def plot_datum(df, output_dir, datum):
+    sm_name = f'Sm{datum}'
+    df1 = df[[datum, sm_name,]]
+    #fig = plt.figure()
+    #ax = fig.gca()
+    fig, ax = plt.subplots()
+    xs = df1.index.values
+    print(f'x-axis type {type(xs)} element type {type(xs[0])}')
+    ys_sm = df1[sm_name].values
+    ys = df1[datum].values
+    ax.bar(xs, ys)
+    ax.plot(xs, ys_sm, 'r')
+    ax.xaxis.set_major_locator(mdates.MonthLocator())
+    ax.xaxis.set_minor_locator(mdates.WeekdayLocator(0)) # 0, Monday
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+    ax.grid(which='both', axis='x')
+    ax.legend(loc='best', labels=['10 day tau', 'Deaths'])
+    ax.grid(which='both', axis='y')
+    fig.autofmt_xdate()
+    fig.savefig(output_dir / f'plot_{datum}.svg')

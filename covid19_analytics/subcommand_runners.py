@@ -28,3 +28,14 @@ class Jhu2Csv:
 
     def run(self):
         self.rf.create_input_data()
+
+class PlotData:
+    def __init__(self, cl_args):
+        impl = import_module('.active_case_analysis',
+                             'covid19_analytics')
+        wrk_dir = cl_args.wrk_dir
+        # so far recover_delay is a don't care for this subcommand
+        self.ac = impl.ActiveCases(csv_filename, wrk_dir, recover_delay=14)
+
+    def run(self):
+        self.ac.create_daily_plots()

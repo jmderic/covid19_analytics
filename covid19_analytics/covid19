@@ -12,6 +12,7 @@ sys.path.append(parent_dir)
 from covid19_analytics.subcommand_runners import (
     FindActive,
     Jhu2Csv,
+    PlotData,
     )
 
 from argparse import ArgumentParser
@@ -26,20 +27,21 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     subparsers = parser.add_subparsers()
 
-    # parser for the find_active subcommand
-    p_start_idea = subparsers.add_parser('find_active')
-    p_start_idea.set_defaults(run_class=FindActive)
-    p_start_idea.add_argument('-r', '--recover-delay',
-                              help='Avg. days, symptomatic to recovery (default: 14)',
-                              type=int, default=14)
-    p_start_idea.add_argument('-w', '--wrk-dir',
-                              help='Working data directory', type=str, required=True)
+    cmds = { 'find_active' : [ FindActive, None ],
+             'jhu2csv' : [ Jhu2Csv, None ],
+             'plot_data' : [ PlotData, None ],
+    }
+    for cmd in cmds:
+        cmds[cmd][1] = subparsers.add_parser(cmd)
+        cmds[cmd][1].set_defaults(run_class=cmds[cmd][0])
+        cmds[cmd][1].add_argument('-w', '--wrk-dir', type=str, required=True,
+                                  help='Working data directory')
 
-    # parser for the jhu2csv subcommand
-    p_start_idea = subparsers.add_parser('jhu2csv')
-    p_start_idea.set_defaults(run_class=Jhu2Csv)
-    p_start_idea.add_argument('-w', '--wrk-dir',
-                              help='Working data directory', type=str, required=True)
+    # additional subparser detail
+    subp = cmds['find_active'][1]
+    subp.add_argument('-r', '--recover-delay',
+                      help='Avg. days, symptomatic to recovery (default: 14)',
+                      type=int, default=14)
 
     # generic subcommand execution call
     parsed_args = parser.parse_args()
