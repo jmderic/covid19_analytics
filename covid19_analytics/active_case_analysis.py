@@ -137,7 +137,7 @@ def plot_datum(df, output_dir, datum):
     ax.xaxis.set_minor_locator(mdates.WeekdayLocator(0)) # 0, Monday
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
     ax.grid(which='both', axis='x')
-    ax.legend(loc='best', labels=['10 day tau', 'Deaths'])
+    ax.legend(loc='best', labels=['10 day tau', datum])
     ax.grid(which='both', axis='y')
     fig.autofmt_xdate()
     fig.savefig(output_dir / f'plot_{datum}.svg')
