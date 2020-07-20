@@ -13,7 +13,8 @@ class ActiveCases:
         self.wrk_dir, self.csv_file = tup
         self.recover_delay = recover_delay
 
-        print(f'Max Rows {pd.get_option("display.max_rows")}')
+        self.disp_max_rows = pd.get_option("display.max_rows")
+        print(f'Max Rows {self.disp_max_rows}')
         pd.set_option("display.min_rows", 40)
 
         self.type_spec = { 'Cases' : np.int32, 'Deaths' : np.int32 }
@@ -21,9 +22,7 @@ class ActiveCases:
     def create_active_plots(self):
         df = self.get_active_df()
         df = prune_dates(df)
-        # 3rd arg: log-lin plot, True; lin-lin plot, False
-        plot_active(df, self.wrk_dir, False)
-        plot_active(df, self.wrk_dir, True)
+        plot_active(df, self.wrk_dir)
 
     def create_daily_plots(self):
         df = self.get_active_df()
@@ -40,13 +39,19 @@ class ActiveCases:
         df['MaxRec'] = df['CumCases'].shift(self.recover_delay,
                                             fill_value=0).astype('int32')
         df['CumRec'] = df['MaxRec'] - df['CumDeaths']
+        # the above can generate negative CumRec values; following
+        # fixes with a little fudge (adding 1) not to unduly delay the
+        # first shown datapoint on the log graph
+        df['CumRec'] = df['CumRec'].apply(lambda x: 1 if x <= 0 else x)
         df['CumActive'] = df['CumCases'] - df['MaxRec']
         data = ('Cases', 'Deaths', 'Rec', 'Active', )
         for datum in data:
             add_daily_col(df, datum)
         if print_df:
+            pd.set_option("display.max_rows", 999)
             print(df)
             print(df.info())
+            pd.set_option("display.max_rows", self.disp_max_rows)
         return df
 
     def get_alldate_csv(self, csv_file):
@@ -58,7 +63,6 @@ class ActiveCases:
         return df
 
 def prune_dates(df):
-    #pd.set_option("display.max_rows", 999)
     if True : # was Log10
         unwanted = df[(df['CumCases']==0) | (df['CumDeaths']==0)
                        | (df['CumRec']==0) | (df['CumActive']==0)]
@@ -67,7 +71,7 @@ def prune_dates(df):
                        & (df['CumRec']<=10) & (df['CumActive']<=10)]
     df1 = df.drop(unwanted.index)
     print(df1)
-    print(df.info())
+    print(df1.info())
     return df1
 
 def add_daily_col(df, datum):
@@ -103,23 +107,22 @@ def add_smoothed_col(df, datum, tau_periods):
     sm = Smoother(tau_periods)
     df[sm_name] = df[datum].apply(sm)
 
-def plot_active(df, output_dir, Log10):
-    #unwanted_cols = ['MaxRec', 'Cases', 'Deaths', 'Rec', 'Active',]
-    #df1 = df.drop(unwanted_cols, axis=1)
+def plot_active(df, output_dir):
     df1 = df[['CumCases', 'CumDeaths', 'CumRec', 'CumActive',]]
     # do the plotting
-    plt.rcParams.update({'figure.autolayout' : True})
-    df1.plot()
-    plot_name_crumb='_linear'
-    if Log10:
-        plt.yscale('log')
-        plot_name_crumb='_loglin'
-        #plt.ticklabel_format(axis='y', style='plain')
-    plt.legend(loc='best', labels=['Cases', 'Deaths', 'Recovered', 'Active'])
-    plt.grid(which='both', axis='both')
-    #plt.show()
-    plt.savefig(output_dir / f'plot{plot_name_crumb}.svg')
-    plt.savefig(output_dir / f'plot{plot_name_crumb}.png')
+    fig, axs = plt.subplots(2, 1, sharex='col', figsize=(8,10))
+    for ax in axs:
+        ax.plot(df1.index, df1.values)
+        ax.grid(which='both', axis='both')
+    axs[0].set_title('Wuhan Coronavirus\nCumulative Totals')
+    axs[0].legend(loc='best', labels=['Cases', 'Deaths', 'Recovered', 'Active'])
+    axs[1].set_yscale('log')
+    axs[1].xaxis.set_major_locator(mdates.MonthLocator())
+    axs[1].xaxis.set_minor_locator(mdates.WeekdayLocator(0)) # 0, Monday
+    axs[1].xaxis.set_major_formatter(mdates.DateFormatter('\n%b'))
+    axs[1].xaxis.set_minor_formatter(mdates.DateFormatter('%d'))
+    plt.subplots_adjust(hspace=0, bottom=.10, top=.92)
+    fig.savefig(output_dir / f'plot_both.svg')
 
 def plot_datum(df, output_dir, datum):
     sm_name = f'Sm{datum}'
@@ -139,5 +142,5 @@ def plot_datum(df, output_dir, datum):
     ax.grid(which='both', axis='x')
     ax.legend(loc='best', labels=['10 day tau', datum])
     ax.grid(which='both', axis='y')
-    fig.autofmt_xdate()
+    plt.subplots_adjust(bottom=.10, top=.92)
     fig.savefig(output_dir / f'plot_{datum}.svg')
