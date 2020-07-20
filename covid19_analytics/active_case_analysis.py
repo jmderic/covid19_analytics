@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-#from matplotlib.ticker import ScalarFormatter
 from covid19_analytics import common
 
 class ActiveCases:
@@ -42,7 +41,8 @@ class ActiveCases:
         # the above can generate negative CumRec values; following
         # fixes with a little fudge (adding 1) not to unduly delay the
         # first shown datapoint on the log graph
-        df['CumRec'] = df['CumRec'].apply(lambda x: 1 if x <= 0 else x)
+        df['CumRec'] = df['CumRec'].apply(lambda x: 1 if x <= 0
+                                          else x).astype('int32')
         df['CumActive'] = df['CumCases'] - df['MaxRec']
         data = ('Cases', 'Deaths', 'Rec', 'Active', )
         for datum in data:
@@ -60,6 +60,11 @@ class ActiveCases:
                          dtype=type_spec)
         idx = pd.date_range(min(df.index), max(df.index))
         df = df.reindex(idx, fill_value=0)
+        for col_name in type_spec:
+            if not df[col_name].is_monotonic:
+                print(f'Scrubbing column {col_name}; '+
+                      'not monotonically increasing')
+                fix_non_monotonic(df, col_name)
         return df
 
 def prune_dates(df):
@@ -77,14 +82,16 @@ def prune_dates(df):
 def add_daily_col(df, datum):
     cum_name = f'Cum{datum}'
     df[datum] = df[cum_name].diff()
-    #df[datum][0] = df[cum_name][0]
-    # view vs copy; above changed to below; detail in commit 6a69792e0
-    row_index = df.index[0]
-    df.loc[row_index, datum] = df[cum_name][0]
-    # end: view vs copy
+    df.loc[df.index[0], datum] = df[cum_name][0]
     df[datum] = df[datum].astype('int32')
 
 class Smoother:
+    """tau is the time constant for the first order filter.  For the
+    analog systemn in response to a 100% step change in the input, the
+    output will go to 63.% in one time constant; 86.5 in 2 tau; 95.0%
+    in 3 tau; 99.8% in 6 tau.  The discrete time system appears to
+    yield slightly lower values.
+    """
     def __init__(self, tau_periods):
         self.alpha = 1 / (tau_periods + 1)
         self.smoothed = None
@@ -97,12 +104,6 @@ class Smoother:
         return self.smoothed
 
 def add_smoothed_col(df, datum, tau_periods):
-    """tau is the time constant for the first order filter.  For the
-    analog systemn in response to a 100% step change in the input, the
-    output will go to 63.% in one time constant; 86.5 in 2 tau; 95.0%
-    in 3 tau; 99.8% in 6 tau.  The discrete time system appears to
-    yield slightly lower values.
-    """
     sm_name = f'Sm{datum}'
     sm = Smoother(tau_periods)
     df[sm_name] = df[datum].apply(sm)
@@ -129,18 +130,28 @@ def plot_datum(df, output_dir, datum):
     df1 = df[[datum, sm_name,]]
     #fig = plt.figure()
     #ax = fig.gca()
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(11,8))
     xs = df1.index.values
     print(f'x-axis type {type(xs)} element type {type(xs[0])}')
     ys_sm = df1[sm_name].values
     ys = df1[datum].values
     ax.bar(xs, ys)
     ax.plot(xs, ys_sm, 'r')
+    ax.grid(which='both', axis='both')
+    ax.set_title(f'Wuhan Coronavirus\nDaily {datum}')
+    ax.legend(loc='best', labels=['10 day tau', datum])
     ax.xaxis.set_major_locator(mdates.MonthLocator())
     ax.xaxis.set_minor_locator(mdates.WeekdayLocator(0)) # 0, Monday
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
-    ax.grid(which='both', axis='x')
-    ax.legend(loc='best', labels=['10 day tau', datum])
-    ax.grid(which='both', axis='y')
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b'))
+    ax.xaxis.set_minor_formatter(mdates.DateFormatter('%d'))
     plt.subplots_adjust(bottom=.10, top=.92)
     fig.savefig(output_dir / f'plot_{datum}.svg')
+
+def fix_non_monotonic(df, col_name):
+    max = df[col_name][-1]
+    for idx in df.index.values[::-1]:
+        test_val = df.loc[idx, col_name]
+        if test_val > max:
+            print(f'Adjust {test_val} to {max} at {np.datetime64(idx, "D")}')
+            df.loc[idx, col_name] = max
+        max = df.loc[idx, col_name]
