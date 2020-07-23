@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright J. Mark Deric, 2020.  All rights reserved
 
 import pandas as pd
@@ -139,7 +140,7 @@ def plot_datum(df, output_dir, datum):
     ax.plot(xs, ys_sm, 'r')
     ax.grid(which='both', axis='both')
     ax.set_title(f'Wuhan Coronavirus\nDaily {datum}')
-    ax.legend(loc='best', labels=['10 day tau', datum])
+    ax.legend(loc='best', labels=['Exp. Smoothed; τ = 10 days', datum])
     ax.xaxis.set_major_locator(mdates.MonthLocator())
     ax.xaxis.set_minor_locator(mdates.WeekdayLocator(0)) # 0, Monday
     ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b'))

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright J. Mark Deric, 2020.  All rights reserved
 
 # Important concept of this file, missed in prior commits.  This file

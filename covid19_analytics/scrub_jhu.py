@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright J. Mark Deric, 2020.  All rights reserved
 
 import pandas as pd
