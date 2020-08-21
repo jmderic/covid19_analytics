@@ -1,0 +1,24 @@
+{
+    "locations": {
+        "BexarTX": {
+            "jhu_srch": "Bexar,Texas",
+            "web_detail": "Bexar County, TX",
+            "web_name": "San Antonio, TX"
+        },
+        "HarrisTX": {
+            "jhu_srch": "Harris,Texas",
+            "web_detail": "Harris County, TX",
+            "web_name": "Houston, TX"
+        },
+        "NewYorkNY": {
+            "jhu_srch": "New York,New York",
+            "web_detail": "New York, NY",
+            "web_name": "New York, NY"
+        },
+        "OrangeCA": {
+            "jhu_srch": "Orange,California",
+            "web_detail": "Orange County, CA",
+            "web_name": "Orange County, CA"
+        }
+    }
+}

@@ -14,6 +14,8 @@ from covid19_analytics.subcommand_runners import (
     FindActive,
     Jhu2Csv,
     PlotData,
+    GetJhuData,
+    CreatePlots,
     )
 
 from argparse import ArgumentParser
@@ -31,6 +33,8 @@ if __name__ == '__main__':
     cmds = { 'find_active' : [ FindActive, None ],
              'jhu2csv' : [ Jhu2Csv, None ],
              'plot_data' : [ PlotData, None ],
+             'get_data' : [ GetJhuData, None ],
+             'create_plots' : [ CreatePlots, None ],
     }
     for cmd in cmds:
         cmds[cmd][1] = subparsers.add_parser(cmd)
@@ -41,8 +45,27 @@ if __name__ == '__main__':
     # additional subparser detail
     subp = cmds['find_active'][1]
     subp.add_argument('-r', '--recover-delay',
-                      help='Avg. days, symptomatic to recovery (default: 14)',
+                      help='Avg. days, positive test to outcome (default: 14)',
                       type=int, default=14)
+    subp.add_argument('-f', '--file-stub', type=str, required=True,
+                      help='Stub for .csv file and prefix stub for graphs')
+    subp = cmds['plot_data'][1]
+    subp.add_argument('-f', '--file-stub', type=str, required=True,
+                      help='Stub for .csv file and prefix stub for graphs')
+    subp = cmds['get_data'][1]
+    subp.add_argument('-R', '--jhu-repo', type=str, required=True,
+                      help='Path to the Johns Hopkins covid git repo')
+    subp.add_argument('-d', '--json-data-list', type=str, required=True,
+                      help='Path to the json data list file')
+    subp = cmds['create_plots'][1]
+    subp.add_argument('-r', '--recover-delay',
+                      help='Avg. days, positive test to outcome (default: 14)',
+                      type=int, default=14)
+    group = subp.add_mutually_exclusive_group(required=True)
+    group.add_argument('-f', '--file-stub', type=str,
+                       help='Stub for .csv file and prefix stub for graphs')
+    group.add_argument('-j', '--use-json', action='store_true',
+                       help='Use the state.json file for plots to create')
 
     # generic subcommand execution call
     parsed_args = parser.parse_args()
