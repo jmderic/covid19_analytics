@@ -12,13 +12,23 @@
         },
         "NewYorkNY": {
             "jhu_srch": "New York,New York",
-            "web_detail": "New York, NY",
-            "web_name": "New York, NY"
+            "web_detail": "New York County, NY",
+            "web_name": "Manhattan (NYC), NY"
         },
         "OrangeCA": {
             "jhu_srch": "Orange,California",
             "web_detail": "Orange County, CA",
             "web_name": "Orange County, CA"
+        },
+        "PlanoTX": {
+            "jhu_srch": "Collin,Texas",
+            "web_detail": "Collin County, TX",
+            "web_name": "Plano, TX"
+        },
+        "SanBerdooCA": {
+            "jhu_srch": "San Bernardino,California",
+            "web_detail": "San Bernardino County, CA",
+            "web_name": "San Bernardino, CA"
         }
     }
 }
