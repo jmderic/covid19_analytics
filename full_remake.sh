@@ -9,6 +9,7 @@ SCRIPT_DIR=$(dirname $(readlink -e $0))
 SPHINX_DIR=/home/mark/development/sphinx_work/sphinx_covid
 
 cd $SCRIPT_DIR
+find . -name ".git" -prune -o -type f -name "*~" -exec rm -f {} \;
 
 pipenv run ./covid19_analytics/covid19 get_data -w ../covid19_runtime_data -R ~/development/covid19_study/COVID-19_JohnsHopkins -d ~/development/covid19_study/covid19_analytics/locations.json
 
