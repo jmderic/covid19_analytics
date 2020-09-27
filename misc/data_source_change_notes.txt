@@ -1,0 +1,20 @@
+Data source changes, Jun 6
+==========================
+
+On Jun 6, today, the OC health authority significantly changed the way
+they present the data.  The variables full of raw data were gone from
+their website.
+
+The data allowed us to follow their corrections to prior day's data,
+confirmed cases.  The deaths did not appear to change and the
+cumulative reflected this.
+
+So today, we perform the simple update of the csv file with 479 cases
+and 17 deaths.  No checking of the prior days is performed.
+
+Adding today's totals to the previous data matches on deaths, but is
+30 cases higher that the 11960 cumulative reported on the website,
+11960.
+
+True ups to be performed later as we learn how to access the raw data.
+

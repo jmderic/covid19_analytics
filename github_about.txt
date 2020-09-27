@@ -1,0 +1,9 @@
+Description
+
+This project processes data from the John's Hopkins CSSE Covid-19
+GitHub repository and creates plots and json data suitable for web
+publishing.
+
+Topics (separate with spaces)
+
+Covid-19 JHU_CSSE Cases Deaths Sphinx website
