@@ -141,7 +141,9 @@ def plot_active(df, output_dir, file_stub, data):
     axs[0].legend(loc='best', labels=data)
     axs[1].set_yscale('log')
     axs[1].xaxis.set_major_locator(mdates.MonthLocator())
-    axs[1].xaxis.set_minor_locator(mdates.WeekdayLocator(0)) # 0, Monday
+    #every other Monday
+    min_loc = mdates.WeekdayLocator(mdates.MO, interval=2)
+    axs[1].xaxis.set_minor_locator(min_loc)
     axs[1].xaxis.set_major_formatter(mdates.DateFormatter('\n%b'))
     axs[1].xaxis.set_minor_formatter(mdates.DateFormatter('%d'))
     plt.subplots_adjust(hspace=0, bottom=.10, top=.92)
@@ -165,7 +167,9 @@ def plot_datum(df, output_dir, file_stub, datum, col_calcs):
     ax.set_title(f'Daily {datum}')
     ax.legend(loc='best', labels=label_list)
     ax.xaxis.set_major_locator(mdates.MonthLocator())
-    ax.xaxis.set_minor_locator(mdates.WeekdayLocator(0)) # 0, Monday
+    #every other Monday
+    min_loc = mdates.WeekdayLocator(mdates.MO, interval=2)
+    ax.xaxis.set_minor_locator(min_loc)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('\n%b'))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter('%d'))
     plt.subplots_adjust(bottom=.10, top=.92)
