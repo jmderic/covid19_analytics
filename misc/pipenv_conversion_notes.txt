@@ -28,6 +28,9 @@ export PATH=/opt/python3.8/bin:$PATH
 touch start_install_`date '+%Y%m%d_%H%M%S'`; pip3.8 install pipenv --user; touch finish_install_`date '+%Y%m%d_%H%M%S'`
 pip3.8 install --upgrade pip --user
 
+NEW
+see also:  /opt/python3.8/bin/python3.8 -m ensure pip [--user]
+
 Put the covid19_analytics package under pipenv
 
 In covid19_analytics $TOP:

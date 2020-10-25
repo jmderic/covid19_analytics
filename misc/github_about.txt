@@ -1,0 +1,8 @@
+Description (formatting with line breaks does not appear to work well
+for pasting into the github text box):
+
+This project processes data from the John's Hopkins CSSE Covid-19 GitHub repository and creates plots and json data suitable for web publishing.
+
+Topics (separate with spaces):
+
+covid-19-data-analysis johns-hopkins-csse sphinx-doc website-generation

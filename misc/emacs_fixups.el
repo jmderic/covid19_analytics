@@ -8,3 +8,5 @@
 
 ;; -*- indent-tabs-mode: nil -*-
 (set-variable (quote indent-tabs-mode) nil nil)
+
+(setq electric-indent-mode nil)

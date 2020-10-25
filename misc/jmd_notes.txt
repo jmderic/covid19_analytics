@@ -1,0 +1,19 @@
+[mark@SkullNUC37 covid19_analytics]$ git status --ignored |sed -ne 's/^\t\(.*\)$/\1/p'
+adhoc_20200806_114732_devX.diff
+covid19_analytics/__pycache__/
+covid19_analytics/unused_snippet_graveyard.py.~1~
+dataflow_update_msg_devX.txt
+env.log
+git_log_20200503_194048_pfda_devX.log
+master_update_find_active_20200711_122548_devX.diff
+master_update_find_active_20200711_122548_devX_nsdiff.log
+master_update_find_active_20200711_122548_devX_nsdiff_sorted.log
+plot_devX.txt
+[mark@SkullNUC37 covid19_analytics]$ rm -rf $(git status --ignored |sed -ne 's/^\t\(.*\)$/\1/p')
+[mark@SkullNUC37 covid19_analytics]$ git status --ignored |sed -ne 's/^\t\(.*\)$/\1/p'
+[mark@SkullNUC37 covid19_analytics]$ 
+
+outlier handling:
+https://matplotlib.org/3.1.0/gallery/subplots_axes_and_figures/broken_axis.html
+
+https://stackoverflow.com/questions/11882393/matplotlib-disregard-outliers-when-plotting
